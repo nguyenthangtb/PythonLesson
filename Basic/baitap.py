@@ -27,7 +27,7 @@ def chuoinguoidung():
     for item in item:
         input("Nhap chuoi: ".split(","))
         strs.append(item)
-
+    
     # strs = [
     #     item for item in input("nhap chuoi: ").split(',')
     # ]

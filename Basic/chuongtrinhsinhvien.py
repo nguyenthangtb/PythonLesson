@@ -3,7 +3,10 @@ import sys
 
 # Nhap vao danh sach sinh vien
 students = []
-num = 2
+num = print("So luong sv muon nhap: ")
+
+num  = int(input())
+
 for student in range(num):
     _hoten = input("Enter hoten: ")
     _diem = int(input("Enter diem: "))

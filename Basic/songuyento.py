@@ -32,3 +32,19 @@ import sys
 #   print("so đã nhâp", n)
 #   continue
 
+def is_prime(n):
+    if n < 2:
+        return False
+    if n % 2 == 0 or n % 3 == 0 or n % 5 == 0:
+        return False
+    for i in range(5, int(n**(1/2)), 2): # Chỉ kiểm tra các số lẻ
+        if n % i == 0:
+            return False
+    return True
+
+print("Mời nhập giá trị N:")
+n = input()
+print('So nguyen to nho hon ', n)
+for i in range(2, int(n)):
+    if is_prime(i):
+        print(i)
