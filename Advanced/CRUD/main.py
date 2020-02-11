@@ -1,6 +1,7 @@
 from flask import Flask, request
 import pymysql
 from flask import jsonify
+import datetime
 
 app = Flask(__name__)
 
@@ -26,10 +27,13 @@ def userAdd():
         _userName = _jsonData['user_name']
         _userEmail = _jsonData['user_email']
         _userPass = _jsonData['user_password']
+        _userBirthday = ''
 
+    
         db = Database()
-        sql = "INSERT INTO tbl_user(user_name, user_email, user_password) VALUES(%s, %s, %s)"
-        data = (_userName, _userEmail, _userPass)
+
+        sql = "INSERT INTO tbl_user(user_name, user_email, user_password, birthday_date) VALUES(%s, %s, %s, %s)"
+        data = (_userName, _userEmail, _userPass, _userBirthday)
         db.cur.execute(sql, data)
         db.con.commit()
         message = {
@@ -41,12 +45,13 @@ def userAdd():
     except Exception as e:
         message = {
             'status': 500,
-            'message': 'User added fail!'
+            'message': 'User added fail!',
         }
         return jsonify(message)
     finally:
         db.cur.close()
         db.con.close()
+
 
 @app.route('/users/<int:id>', methods=['PUT'])
 def userUpdate(id):
@@ -81,29 +86,48 @@ def userUpdate(id):
 @app.route('/users', methods=['GET'])
 def users():
     db = Database()
-    db.cur.execute("SELECT * FROM tbl_user LIMIT 50")
+    db.cur.execute("select * from tbl_user LIMIT 50")
     result = db.cur.fetchall()
+    result[3]['birthday_date'] = datetime.datetime.strptime(str(result[3]['birthday_date']), '%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d %H:%M:%S")
     return jsonify(result)
 
 
-@app.route('/user/<int:id>', methods=['GET'])
+@app.route('/user/<id>', methods=['GET'])
 def userDetail(id):
-    db = Database()
-    db.cur.execute("select * from tbl_user where user_id=%s", id)
-    result = db.cur.fetchone()
-    return jsonify(result)
+    count = checkData(id)
+    if count != 0:
+        db = Database()
+        db.cur.execute("select * from tbl_user where user_id=%s", id)
+        result = db.cur.fetchone()
+        return jsonify(result)
+    else:
+        message = {
+            'status': 404,
+            'message': 'User not found ',
+        }
+        return jsonify(message)
 
-@app.route('/user/<int:id>', methods=['DELETE'])
+
+@app.route('/user/<id>', methods=['DELETE'])
 def userDelete(id):
-    
-    db = Database()
-    db.cur.execute('DELETE FROM tbl_user WHERE user_id=%s', id)
-    db.con.commit()
-    message = {
-        'status': 200,
-        'message': 'User deleted successfully!'
-    }
-    return jsonify(message)
+
+    count = checkData(id)
+    if count != 0:
+        db = Database()
+        db.cur.execute('delete from tbl_user where user_id=%s', id)
+        db.con.commit()
+        message = {
+            'status': 200,
+            'message': 'User deleted successfully!'
+        }
+        return jsonify(message)
+    else:
+        message = {
+            'status': 404,
+            'message': 'User not found!'
+        }
+        return jsonify(message)
+
 
 @app.errorhandler(404)
 def not_found(error=None):
@@ -115,6 +139,13 @@ def not_found(error=None):
     resp.status_code = 404
 
     return resp
+
+
+def checkData(id):
+    db = Database()
+    db.cur.execute("select * from tbl_user where user_id=%s", id)
+    result = db.cur.rowcount
+    return result
 
 
 if __name__ == "__main__":

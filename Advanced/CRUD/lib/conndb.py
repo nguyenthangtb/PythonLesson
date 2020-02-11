@@ -9,7 +9,7 @@ class Database:
         db = "demo"
 
         self.con = pymysql.connect(host=host, user=user, 
-        password=password, db=db, 
+        password=password, db=db,
         cursorclass=pymysql.cursors.DictCursor)
         
         self.cur = self.con.cursor()
