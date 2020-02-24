@@ -88,7 +88,7 @@ def users():
     return jsonify({"data": result})
 
 # user detail
-@app.route('/users/<id>', methods=['GET'])
+@app.route('/users/<int:id>', methods=['GET'])
 def userDetail(id):
     existsData = checkData(id)
     if existsData != 0:
